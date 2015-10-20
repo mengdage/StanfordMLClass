@@ -62,12 +62,72 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+% Y: 10*5000
+Yhat = zeros(num_labels, length(y));
+for i = 1:length(y),
+    Yhat(y(i),i) = 1;
+end
+% X: 5000 x 401
+Xaddone = [ones(m,1),X]; 
+% z2:25 x 5000 
+z2 = Theta1*Xaddone';
+% a2:25 x 5000 
+a2 = sigmoid(z2);
+% z2:26 x 5000 
+a2 = [ones(1, size(a2,2)); a2];
+
+% z3: 10*5000
+z3 = Theta2 * a2;
+% a3: 10*5000
+a3 = sigmoid(z3);
+
+J = 1/m * sum(sum(-Yhat .* log(a3) - (1-Yhat) .* log(1-a3)));
+sqTheta1 = Theta1(:,2:end).^2;
+sqTheta2 = Theta2(:,2:end).^2;
+sqTheta = [sqTheta1(:);sqTheta2(:)];
+J= J+ lambda/(2*m)*sum(sqTheta);
+
+for t = 1:m,
+    a1 = X(t, :);
+    % add the biased unit
+    % a1: 401 * 1
+    a1 = [1, a1]';
+    
+    % z2: 25 * 1
+    z2 = Theta1 * a1;
+    % a2: 26*1
+    a2 = sigmoid(z2);
+    a2 = [1;a2];
+    
+    % z3: 10*1
+    z3 = Theta2 * a2;
+    % a3: 10*1
+    a3 = sigmoid(z3);
+    
+    Yhat = zeros(num_labels, 1);
+    Yhat(y(t)) = 1;
+    % deta3: 10*1
+    deta3 = a3 -Yhat;
+    
+    % deta2: 25 * 1
+    deta2 = Theta2' * deta3;
+    deta2 = deta2(2:end);
+    deta2 = deta2.* sigmoidGradient(z2);
+    
+    %Theta2_grad: 10*26
+    Theta2_grad = Theta2_grad + deta3 * a2';
+    %Theta1_grad: 25x401
+    Theta1_grad = Theta1_grad + deta2 * a1';
+end
+
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) +lambda*Theta2(:, 2:end);
+Theta2_grad = 1/m*Theta2_grad;
+
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) +lambda*Theta1(:, 2:end);
+Theta1_grad = 1/m*Theta1_grad;
 
 
-
-
-
-
+grad = [Theta2_grad(:);Theta1_grad(:)];
 
 
 
