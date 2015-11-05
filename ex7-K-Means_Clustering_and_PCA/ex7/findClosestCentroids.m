@@ -21,8 +21,23 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
-
-
+m = size(X,2);
+% for every X, find the closet centroid
+for i = 1:size(X,1)
+    min = 1/m*sum((X(i,:)-centroids(1,:)).^2);
+    idx(i) = 1;
+    % compute the distance from X(i) to every centroids, choose the
+    % smallest distance and assign the corresponding id of the centroid to
+    % idx
+    for j = 2:K
+        
+        dist = 1/m*sum((X(i,:)-centroids(j,:)).^2);
+        if dist < min,
+            min = dist;
+            idx(i) = j;
+        end
+    end
+end
 
 
 
